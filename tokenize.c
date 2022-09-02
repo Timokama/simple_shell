@@ -1,37 +1,39 @@
 #include "shell.h"
-
 /**
- * tokenize - tokenizes a buffer with a delimiter
- * @buffer: buffer to tokenize
- * @delimiter: delimiter to tokenize along
- * Return: pointer to an array of pointers to the tokens
+ * tokenize - this function separate the string using a designed delimiter
+ * @data: a pointer to the program's data
+ * Return: an array of the different parts of the string
  */
-char **tokenize(char *buffer, char *delimiter)
+void tokenize(data_of_program *data)
 {
-	char **tokens = NULL;
-	size_t i = 0, mcount = 10;
+	char *delimiter = " \t";
+	int i, j, counter = 2, length;
 
-	if (buffer == NULL)
-		return (NULL);
-	tokens = malloc(sizeof(char *) * mcount);
-	if (tokens == NULL)
+	length = str_length(data->input_line);
+	if (length)
 	{
-		perror("Fatal Error");
-		return (NULL);
+		if (data->input_line[length - 1] == '\n')
+			data->input_line[length - 1] = '\0';
 	}
-	while ((tokens[i] = new_strtok(buffer, delimiter)) != NULL)
+	for (i = 0; data->input_line[i]; i++)
 	{
-		i++;
-		if (i == mcount)
+		for (j = 0; delimiter[j]; j++)
 		{
-			tokens = _realloc(tokens, &mcount);
-			if (tokens == NULL)
-			{
-				perror("Fatal Error");
-				return (NULL);
-			}
+			if (data->input_line[i] == delimiter[j])
+				counter++;
 		}
-		buffer = NULL;
 	}
-	return (tokens);
+	data->tokens = malloc(counter * sizeof(char *));
+	if (data->tokens == NULL)
+	{
+		perror(data->program_name);
+		exit(errno);
+	}
+	i = 0;
+	data->tokens[i] = str_duplicate(_strtok(data->input_line, delimiter));
+	data->command_name = str_duplicate(data->tokens[0]);
+	while (data->tokens[i++])
+	{
+		data->tokens[i] = str_duplicate(_strtok(NULL, delimiter));
+	}
 }
